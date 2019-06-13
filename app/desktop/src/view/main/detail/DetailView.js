@@ -50,8 +50,17 @@ Ext.define('MyExtGenApp.view.main.detail.DetailView', {
           text: 'Save',
           listeners: {
             tap: function() {
-              console.log(this);
-              console.log(this.getEmail());
+              var p = this.parent.parent.getViewModel().get('personnel');
+              var personnelViews = Ext.ComponentQuery.query(".personnelview");
+              console.log(personnelViews);
+              personnelViews.forEach(function(pv){
+                console.log(pv.getStore());
+                pv.getStore().loadData([p], true);
+                console.log(pv.getStore().getData());
+                // console.log(pv.getViewModel().get('items'));
+                // pv.getViewModel().set('items', [p]);
+                // console.log(pv.getViewModel().get('items'));
+              });
             }
           }
         }
