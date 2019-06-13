@@ -37,6 +37,24 @@ object Build : BuildType({
         root(DslContext.settingsRoot)
     }
 
+    artifactRules = "./artifacts/*"
+
+    steps {
+        script {
+            name = "Install dependencies"
+            scriptContent = """
+                #!/bin/bash
+                npm install
+            """.trimIndent()
+        }
+        script {
+            name = "Jasmine"
+            scriptContent = """
+                karma start --single-run --browsers PhantomJS --reporters html
+            """.trimIndent()
+        }
+    }
+
     triggers {
         vcs {
         }
