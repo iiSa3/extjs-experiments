@@ -41,17 +41,14 @@ object Build : BuildType({
 
     steps {
         script {
-            name = "Install dependencies"
+            name = "Run Jasmine Tests"
             scriptContent = """
-                #!/bin/bash
-                npm install
-            """.trimIndent()
-        }
-        script {
-            name = "Jasmine"
-            scriptContent = """
-                karma start --single-run --browsers PhantomJS --reporters html
-            """.trimIndent()
+            npm install
+            npm test
+        """.trimIndent()
+            dockerImage = "selenium/node-chrome"
+            dockerImagePlatform = ScriptBuildStep.ImagePlatform.Linux
+            dockerRunParameters = "-e HUB_HOST=selenium-hub -e START_XVFB=false"
         }
     }
 
