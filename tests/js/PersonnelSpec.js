@@ -78,13 +78,19 @@ describe("The detail view popout", function() {
             done();
         });
     });
-    it("should expand when the arrow button is clicked", function(done) {
+    it("should expand when the arrow button is clicked and shrink when clicked again", function(done) {
         var button = this.driver.findElement(selenium.By.css("#detailview-expand"));
         button.click().then(() => {
             var popout = this.driver.findElement(selenium.By.css('.detailview'));
             popout.getCssValue("width").then((width) => {
                 expect(width).toBe("300px");
-                done();
+
+                button.click().then(() => {
+                    popout.getCssValue("width").then((width) => {
+                        expect(width).toBe("0px");
+                        done();
+                    });
+                });
             });
         })
     });
