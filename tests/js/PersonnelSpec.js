@@ -12,7 +12,7 @@ spawn = mySpawn;
 
 var proc;
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
 
 
@@ -93,5 +93,38 @@ describe("The detail view popout", function() {
                 });
             });
         })
+    });
+
+    it("should add to the personnel list when a record is entered", function(done) {
+        var button = this.driver.findElement(selenium.By.css("#detailview-expand"));
+        button.click().then(() => {
+            var popout = this.driver.findElement(selenium.By.css('.detailview'));
+            var name = popout.findElement(selenium.By.id('new-personnel-name'));
+            var email = popout.findElement(selenium.By.id('new-personnel-email'));
+            var phone = popout.findElement(selenium.By.id('new-personnel-phone'));
+            var promises = [];
+
+            var p = name.then((el) => {
+                console.log(el);
+                el.setAttribute("value", "Sam Griffin");
+            });
+            promises.push(p);
+
+            // promises.push(name.setAttribute("value", "Sam Griffin"));
+            // promises.push(email.setAttribute("value", "sam.griffin@verint.com"));
+            // promises.push(phone.setAttribute("value", "012231334"));
+
+            Promise.all(promises).then((values) => {
+                var save = this.driver.findElement(selenium.By.xpath('#new-personnel-save'));
+                save.click().then(() => {
+                    var pv = this.driver.findElement(selenium.By.className("personnelview"));
+                    var children = pv.findElements(selenium.By.className("x-gridrow"));
+                    children.then(function(res) {
+                        expect(res.length).toBe(5);
+                        done();
+                    });
+                });
+            });
+        });
     });
 })
