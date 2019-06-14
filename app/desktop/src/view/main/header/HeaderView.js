@@ -14,7 +14,8 @@ Ext.define('MyExtGenApp.view.main.header.HeaderView', {
 			ui: 'headerbutton',
 			reference: 'detailtoggle',
 			handler: 'onHeaderViewDetailToggle',
-			iconCls: 'x-fa fa-arrow-left'
+			iconCls: 'x-fa fa-arrow-left',
+			id: 'detailview-expand'
 		}
 	]
 });

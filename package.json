@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@sencha/ext-webpack-plugin": "~6.7.0",
+    "child_process": "^1.0.2",
     "cross-env": "^5.2.0",
     "grunt": "^1.0.4",
     "grunt-contrib-jasmine": "^2.0.3",
