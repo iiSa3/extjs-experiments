@@ -98,37 +98,44 @@ describe("The detail view popout", function() {
     it("should add to the personnel list when a record is entered", function(done) {
         var button = this.driver.findElement(selenium.By.xpath("//*[@data-componentid=\"detailview-expand\"]"));
         button.click().then(() => {
-            var popout = this.driver.findElement(selenium.By.css('.detailview'));
-            var name = this.driver.findElement(selenium.By.xpath('//*[@data-componentid="new-personnel-name"]')).then(el => { console.log(el); return el.sendKeys("Sam Griffin"); });         // var phone = popout.findElement(selenium.By.xpath('//*[@data-componentid="new-personnel-phone"]')).then(el => { return el.sendKeys("07724859176"); });
-            var promises = [name];
-
-            // var p = name.then((el) => {
-            //     console.log(el);
-            //     el.setAttribute("value", "Sam Griffin");
-            // });
-            // promises.push(p);
-
-            // promises.push(name.setAttribute("value", "Sam Griffin"));
-            // promises.push(email.setAttribute("value", "sam.griffin@verint.com"));
-            // promises.push(phone.setAttribute("value", "012231334"));
-
-            Promise.all(promises).then((values) => {
-                var save = popout.findElement(selenium.By.xpath('//*[@id="ext-element-80"]'));
-                console.log(save);
-                save.click().then(() => {
-                    var pv = this.driver.findElement(selenium.By.className("personnelview"));
-                    var children = pv.findElements(selenium.By.className("x-gridrow"));
-                    children.then(function(res) {
-                        expect(res.length).toBe(5);
-                        done();
+            var popout;
+            this.driver.findElement(selenium.By.css('.detailview'))
+                .then(popout_found => {
+                    popout = popout_found;
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-name"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("Sam Griffin");
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-email"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("sam.griffin@verint.com")
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-phone"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("0722213499");
+                })
+                .then((values) => {
+                    popout.findElement(selenium.By.xpath('//*[@id="ext-element-80"]'))
+                        .click()
+                        .then(() => {
+                        this.driver.findElements(selenium.By.css(".personnelview .x-gridrow"))
+                            .then(function(res) {
+                                expect(res.length).toBe(5);
+                                res[4].findElements(selenium.By.className('x-gridcell-body-el'))
+                                    .then(els => {
+                                        els[0].getText().then(txt => {
+                                            expect(txt).toBe("Sam Griffin");
+                                            done();
+                                        });
+                                    });
+                            });
                     });
                 });
-            }, (err) => {
-                console.log(err);
-                console.log("One of the send keys promises failed");
-                throw err;
-                done();
-            });
         });
     });
-})
+});
