@@ -119,7 +119,7 @@ describe("The detail view popout", function() {
                 .then(el => {
                     return el[1].sendKeys("0722213499");
                 })
-                .then((values) => {
+                .then(() => {
                     popout.findElement(selenium.By.xpath('//*[@id="ext-element-80"]'))
                         .click()
                         .then(() => {
@@ -138,6 +138,93 @@ describe("The detail view popout", function() {
                                                 expect(values[2]).toBe("0722213499");
                                                 done();
                                             });
+                                        });
+                                });
+                        });
+                });
+        });
+    });
+
+    it("should allow multiple entries to be added", function(done) {
+        var button = this.driver.findElement(selenium.By.xpath("//*[@data-componentid=\"detailview-expand\"]"));
+        button.click().then(() => {
+            var popout;
+            this.driver.findElement(selenium.By.css('.detailview'))
+                .then(popout_found => {
+                    popout = popout_found;
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-name"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("Sam Griffin");
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-email"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("sam.griffin@verint.com")
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-phone"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("0722213499");
+                })
+                .then(p => {
+                    return popout.findElement(selenium.By.xpath('//*[@id="ext-element-80"]')).click();
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-name"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("Sam Griffin2");
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-email"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("sam.griffin2@verint.com")
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-phone"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("0722213499");
+                })
+                .then(() => {
+                    popout.findElement(selenium.By.xpath('//*[@id="ext-element-80"]'))
+                        .click()
+                        .then(() => {
+                            this.driver.findElements(selenium.By.css(".personnelview .x-gridrow"))
+                                .then(function(res) {
+                                    expect(res.length).toBe(6);
+                                    res[4]
+                                        .findElements(selenium.By.className('x-gridcell-body-el'))
+                                        .then(els => {
+                                            var text_promises = [];
+                                            for (var i = 0; i < els.length; i++) {
+                                                text_promises.push(els[i].getText());
+                                            }
+                                            return Promise.all(text_promises);
+                                        })
+                                        .then(values => {
+                                            expect(values[0]).toBe("Sam Griffin");
+                                            expect(values[1]).toBe("sam.griffin@verint.com");
+                                            expect(values[2]).toBe("0722213499");
+
+                                            return res[5].findElements(selenium.By.className('x-gridcell-body-el'))
+                                        })
+                                        .then(els => {
+                                            var text_promises = [];
+                                            for (var i = 0; i < els.length; i++) {
+                                                text_promises.push(els[i].getText());
+                                            }
+                                            return Promise.all(text_promises);
+                                        })
+                                        .then(values => {
+                                            expect(values[0]).toBe("Sam Griffin2");
+                                            expect(values[1]).toBe("sam.griffin2@verint.com");
+                                            expect(values[2]).toBe("0722213499");
+                                            done();
                                         });
                                 });
                         });
