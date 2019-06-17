@@ -96,26 +96,25 @@ describe("The detail view popout", function() {
     });
 
     it("should add to the personnel list when a record is entered", function(done) {
-        var button = this.driver.findElement(selenium.By.css("#detailview-expand"));
+        var button = this.driver.findElement(selenium.By.xpath("//*[@data-componentid=\"detailview-expand\"]"));
         button.click().then(() => {
             var popout = this.driver.findElement(selenium.By.css('.detailview'));
-            var name = popout.findElement(selenium.By.id('new-personnel-name'));
-            var email = popout.findElement(selenium.By.id('new-personnel-email'));
-            var phone = popout.findElement(selenium.By.id('new-personnel-phone'));
-            var promises = [];
+            var name = this.driver.findElement(selenium.By.xpath('//*[@data-componentid="new-personnel-name"]')).then(el => { console.log(el); return el.sendKeys("Sam Griffin"); });         // var phone = popout.findElement(selenium.By.xpath('//*[@data-componentid="new-personnel-phone"]')).then(el => { return el.sendKeys("07724859176"); });
+            var promises = [name];
 
-            var p = name.then((el) => {
-                console.log(el);
-                el.setAttribute("value", "Sam Griffin");
-            });
-            promises.push(p);
+            // var p = name.then((el) => {
+            //     console.log(el);
+            //     el.setAttribute("value", "Sam Griffin");
+            // });
+            // promises.push(p);
 
             // promises.push(name.setAttribute("value", "Sam Griffin"));
             // promises.push(email.setAttribute("value", "sam.griffin@verint.com"));
             // promises.push(phone.setAttribute("value", "012231334"));
 
             Promise.all(promises).then((values) => {
-                var save = this.driver.findElement(selenium.By.xpath('#new-personnel-save'));
+                var save = popout.findElement(selenium.By.xpath('//*[@id="ext-element-80"]'));
+                console.log(save);
                 save.click().then(() => {
                     var pv = this.driver.findElement(selenium.By.className("personnelview"));
                     var children = pv.findElements(selenium.By.className("x-gridrow"));
@@ -124,6 +123,11 @@ describe("The detail view popout", function() {
                         done();
                     });
                 });
+            }, (err) => {
+                console.log(err);
+                console.log("One of the send keys promises failed");
+                throw err;
+                done();
             });
         });
     });
