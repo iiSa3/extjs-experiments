@@ -123,18 +123,24 @@ describe("The detail view popout", function() {
                     popout.findElement(selenium.By.xpath('//*[@id="ext-element-80"]'))
                         .click()
                         .then(() => {
-                        this.driver.findElements(selenium.By.css(".personnelview .x-gridrow"))
-                            .then(function(res) {
-                                expect(res.length).toBe(5);
-                                res[4].findElements(selenium.By.className('x-gridcell-body-el'))
-                                    .then(els => {
-                                        els[0].getText().then(txt => {
-                                            expect(txt).toBe("Sam Griffin");
-                                            done();
+                            this.driver.findElements(selenium.By.css(".personnelview .x-gridrow"))
+                                .then(function(res) {
+                                    expect(res.length).toBe(5);
+                                    res[4].findElements(selenium.By.className('x-gridcell-body-el'))
+                                        .then(els => {
+                                            var text_promises = [];
+                                            for (var i = 0; i < els.length; i++) {
+                                                text_promises.push(els[i].getText());
+                                            }
+                                            Promise.all(text_promises).then(values => {
+                                                expect(values[0]).toBe("Sam Griffin");
+                                                expect(values[1]).toBe("sam.griffin@verint.com");
+                                                expect(values[2]).toBe("0722213499");
+                                                done();
+                                            });
                                         });
-                                    });
-                            });
-                    });
+                                });
+                        });
                 });
         });
     });
