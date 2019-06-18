@@ -16,6 +16,15 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
 
 
+function wait(ms = 1000) {
+    var start = Date.now(),
+        now = start;
+    while (now - start < ms) {
+        now = Date.now();
+    }
+}
+
+
 beforeEach(function(done) {
     this.driver = new selenium.Builder().forBrowser('chrome').build();
     this.driver.get('http://localhost:1962/#personnelview').then(done);
@@ -228,6 +237,110 @@ describe("The detail view popout", function() {
                                         });
                                 });
                         });
+                });
+        });
+    });
+});
+
+describe("Deleting a personnel from the list", function() {
+    describe("has a confirmation popup", function() {
+        it("should delete the correct person on confirm", function(done) {
+            var person_id = null;
+            var person;
+            var messagebox;
+            this.driver.findElements(selenium.By.css('.personnelview .x-gridrow'))
+                .then(els => {
+                    person = els[els.length - 1];
+                    return person.getAttribute('data-componentid');
+                })
+                .then((pid => {
+                    person_id = pid;
+                    return person.findElements(selenium.By.className('x-gridcell-body-el'))
+                }))
+                .then(els => {
+                    var text_promises = [];
+                    for (var i = 0; i < els.length; i++) {
+                        text_promises.push(els[i].getText());
+                    }
+                    return Promise.all(text_promises);
+                })
+                .then(values => {
+                    return person.click();
+                })
+                .then(p => {
+                    return this.driver.findElements(selenium.By.css('.x-messagebox'));
+                })
+                .then(els => {
+                    messagebox = els[0];
+                    return els[0].getAttribute("class");
+                })
+                .then((c) => {
+                    expect(c.indexOf("x-hidden") === -1).toBe(true);
+
+                    return messagebox.findElements(selenium.By.css('.x-button-el'));
+                })
+                .then(els => {
+                    return els[0].click();
+                })
+                .then(p => {
+                    console.log(person_id);
+
+                    //wait for animations etc.
+                    wait();
+
+
+                    return this.driver.findElements(selenium.By.css('.personnelview .x-gridrow[data-componentid="' + person_id + '"]'));
+                })
+                .then(els => {
+                    expect(els.length).toBe(0);
+                    done();
+                });
+        });
+
+        it("should not delete the person on cancel", function(done) {
+            var person_id = 0;
+            var person;
+            var messagebox;
+            this.driver.findElements(selenium.By.css('.personnelview .x-gridrow'))
+                .then(els => {
+                    person = els[els.length - 1];
+                    return person.getAttribute('data-componentid');
+                })
+                .then((pid => {
+                    person_id = pid;
+                    return person.findElements(selenium.By.className('x-gridcell-body-el'))
+                }))
+                .then(els => {
+                    var text_promises = [];
+                    for (var i = 0; i < els.length; i++) {
+                        text_promises.push(els[i].getText());
+                    }
+                    return Promise.all(text_promises);
+                })
+                .then(values => {
+                    return person.click();
+                })
+                .then(p => {
+                    return this.driver.findElements(selenium.By.css('.x-messagebox'));
+                })
+                .then(els => {
+                    messagebox = els[0];
+                    return els[0].getAttribute("class");
+                })
+                .then((c) => {
+                    expect(c.indexOf("x-hidden") === -1).toBe(true);
+
+                    return messagebox.findElements(selenium.By.css('.x-button-el'));
+                })
+                .then(els => {
+                    return els[1].click();
+                })
+                .then(p => {
+                    return this.driver.findElements(selenium.By.css('[data-componentid="' + person_id + '"]'));
+                })
+                .then(els => {
+                    expect(els.length).toBe(1);
+                    done();
                 });
         });
     });
