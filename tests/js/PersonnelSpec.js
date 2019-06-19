@@ -12,10 +12,17 @@ spawn = mySpawn;
 
 var proc;
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
 
 
+function wait(ms = 1000) {
+    var start = Date.now(),
+        now = start;
+    while (now - start < ms) {
+        now = Date.now();
+    }
+}
 beforeEach(function(done) {
     this.driver = new selenium.Builder().forBrowser('chrome').build();
     this.driver.get('http://localhost:1962/#personnelview').then(done);
@@ -94,4 +101,245 @@ describe("The detail view popout", function() {
             });
         })
     });
-})
+
+    it("should add to the personnel list when a record is entered", function(done) {
+        var button = this.driver.findElement(selenium.By.xpath("//*[@data-componentid=\"detailview-expand\"]"));
+        button.click().then(() => {
+            var popout;
+            this.driver.findElement(selenium.By.css('.detailview'))
+                .then(popout_found => {
+                    popout = popout_found;
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-name"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("Sam Griffin");
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-email"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("sam.griffin@verint.com")
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-phone"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("0722213499");
+                })
+                .then(() => {
+                    popout.findElement(selenium.By.xpath('//*[@id="ext-element-80"]'))
+                        .click()
+                        .then(() => {
+                            this.driver.findElements(selenium.By.css(".personnelview .x-gridrow"))
+                                .then(function(res) {
+                                    expect(res.length).toBe(5);
+                                    res[4].findElements(selenium.By.className('x-gridcell-body-el'))
+                                        .then(els => {
+                                            var text_promises = [];
+                                            for (var i = 0; i < els.length; i++) {
+                                                text_promises.push(els[i].getText());
+                                            }
+                                            Promise.all(text_promises).then(values => {
+                                                expect(values[0]).toBe("Sam Griffin");
+                                                expect(values[1]).toBe("sam.griffin@verint.com");
+                                                expect(values[2]).toBe("0722213499");
+                                                done();
+                                            });
+                                        });
+                                });
+                        });
+                });
+        });
+    });
+
+    it("should allow multiple entries to be added", function(done) {
+        var button = this.driver.findElement(selenium.By.xpath("//*[@data-componentid=\"detailview-expand\"]"));
+        button.click().then(() => {
+            var popout;
+            this.driver.findElement(selenium.By.css('.detailview'))
+                .then(popout_found => {
+                    popout = popout_found;
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-name"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("Sam Griffin");
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-email"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("sam.griffin@verint.com")
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-phone"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("0722213499");
+                })
+                .then(p => {
+                    return popout.findElement(selenium.By.xpath('//*[@id="ext-element-80"]')).click();
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-name"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("Sam Griffin2");
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-email"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("sam.griffin2@verint.com")
+                })
+                .then(p => {
+                    return popout.findElements(selenium.By.xpath('//*[@data-componentid="new-personnel-phone"]'))
+                })
+                .then(el => {
+                    return el[1].sendKeys("0722213499");
+                })
+                .then(() => {
+                    popout.findElement(selenium.By.xpath('//*[@id="ext-element-80"]'))
+                        .click()
+                        .then(() => {
+                            this.driver.findElements(selenium.By.css(".personnelview .x-gridrow"))
+                                .then(function(res) {
+                                    expect(res.length).toBe(6);
+                                    res[4]
+                                        .findElements(selenium.By.className('x-gridcell-body-el'))
+                                        .then(els => {
+                                            var text_promises = [];
+                                            for (var i = 0; i < els.length; i++) {
+                                                text_promises.push(els[i].getText());
+                                            }
+                                            return Promise.all(text_promises);
+                                        })
+                                        .then(values => {
+                                            expect(values[0]).toBe("Sam Griffin");
+                                            expect(values[1]).toBe("sam.griffin@verint.com");
+                                            expect(values[2]).toBe("0722213499");
+
+                                            return res[5].findElements(selenium.By.className('x-gridcell-body-el'))
+                                        })
+                                        .then(els => {
+                                            var text_promises = [];
+                                            for (var i = 0; i < els.length; i++) {
+                                                text_promises.push(els[i].getText());
+                                            }
+                                            return Promise.all(text_promises);
+                                        })
+                                        .then(values => {
+                                            expect(values[0]).toBe("Sam Griffin2");
+                                            expect(values[1]).toBe("sam.griffin2@verint.com");
+                                            expect(values[2]).toBe("0722213499");
+                                            done();
+                                        });
+                                });
+                        });
+                });
+        });
+    });
+});
+
+describe("Deleting a personnel from the list", function() {
+    describe("has a confirmation popup", function() {
+        it("should delete the correct person on confirm", function(done) {
+            var person_id = null;
+            var person;
+            var messagebox;
+            this.driver.findElements(selenium.By.css('.personnelview .x-gridrow'))
+                .then(els => {
+                    person = els[els.length - 1];
+                    return person.getAttribute('data-componentid');
+                })
+                .then((pid => {
+                    person_id = pid;
+                    return person.findElements(selenium.By.className('x-gridcell-body-el'))
+                }))
+                .then(els => {
+                    var text_promises = [];
+                    for (var i = 0; i < els.length; i++) {
+                        text_promises.push(els[i].getText());
+                    }
+                    return Promise.all(text_promises);
+                })
+                .then(values => {
+                    return person.click();
+                })
+                .then(p => {
+                    return this.driver.findElements(selenium.By.css('.x-messagebox'));
+                })
+                .then(els => {
+                    messagebox = els[0];
+                    return els[0].getAttribute("class");
+                })
+                .then((c) => {
+                    expect(c.indexOf("x-hidden") === -1).toBe(true);
+
+                    return messagebox.findElements(selenium.By.css('.x-button-el'));
+                })
+                .then(els => {
+                    return els[0].click();
+                })
+                .then(p => {
+                    console.log(person_id);
+
+                    //wait for animations etc.
+                    wait();
+
+
+                    return this.driver.findElements(selenium.By.css('.personnelview .x-gridrow[data-componentid="' + person_id + '"]'));
+                })
+                .then(els => {
+                    expect(els.length).toBe(0);
+                    done();
+                });
+        });
+
+        it("should not delete the person on cancel", function(done) {
+            var person_id = 0;
+            var person;
+            var messagebox;
+            this.driver.findElements(selenium.By.css('.personnelview .x-gridrow'))
+                .then(els => {
+                    person = els[els.length - 1];
+                    return person.getAttribute('data-componentid');
+                })
+                .then((pid => {
+                    person_id = pid;
+                    return person.findElements(selenium.By.className('x-gridcell-body-el'))
+                }))
+                .then(els => {
+                    var text_promises = [];
+                    for (var i = 0; i < els.length; i++) {
+                        text_promises.push(els[i].getText());
+                    }
+                    return Promise.all(text_promises);
+                })
+                .then(values => {
+                    return person.click();
+                })
+                .then(p => {
+                    return this.driver.findElements(selenium.By.css('.x-messagebox'));
+                })
+                .then(els => {
+                    messagebox = els[0];
+                    return els[0].getAttribute("class");
+                })
+                .then((c) => {
+                    expect(c.indexOf("x-hidden") === -1).toBe(true);
+
+                    return messagebox.findElements(selenium.By.css('.x-button-el'));
+                })
+                .then(els => {
+                    return els[1].click();
+                })
+                .then(p => {
+                    return this.driver.findElements(selenium.By.css('.personnelview .x-gridrow[data-componentid="' + person_id + '"]'));
+                })
+                .then(els => {
+                    expect(els.length).toBe(1);
+                    done();
+                });
+        });
+    });
+});

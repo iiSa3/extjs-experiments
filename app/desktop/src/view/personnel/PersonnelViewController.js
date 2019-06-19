@@ -4,7 +4,7 @@ Ext.define('MyExtGenApp.view.personnel.PersonnelViewController', {
 
 	onItemSelected: function (sender, record) {
 
-		Ext.Msg.confirm('Confirm', 'Are you sure?', (choice) => {
+		Ext.Msg.confirm('Confirm', 'Are you sure you want to delete this person?', (choice) => {
 			if(choice === 'yes') {
 				sender.store.remove(record);
 			}
